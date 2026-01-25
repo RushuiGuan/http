@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.1.11304.174 d18.0
+VisualStudioVersion = 18.1.11304.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Albatross.Http", "Albatross.Http\Albatross.Http.csproj", "{A1B2C3D4-1234-5678-9ABC-DEF012345678}"
 EndProject
@@ -10,12 +9,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		.projects = .projects
+		alias.ps1 = alias.ps1
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Albatross.Http.Test", "Albatross.Http.Test\Albatross.Http.Test.csproj", "{C3D4E5F6-3456-789A-BCDE-F01234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.CommandLine", "Sample.CommandLine\Sample.CommandLine.csproj", "{C851B434-B0EF-A169-CB5B-C5B70E467328}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.WebApi", "Sample.WebApi\Sample.WebApi.csproj", "{AC2FD6A8-334C-212E-7650-D0FB2345DA4F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.WebClient", "Sample.WebClient\Sample.WebClient.csproj", "{88511E16-7209-4B98-B5EB-04E5CF46A9AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +38,18 @@ Global
 		{C3D4E5F6-3456-789A-BCDE-F01234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3D4E5F6-3456-789A-BCDE-F01234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3D4E5F6-3456-789A-BCDE-F01234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C851B434-B0EF-A169-CB5B-C5B70E467328}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C851B434-B0EF-A169-CB5B-C5B70E467328}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C851B434-B0EF-A169-CB5B-C5B70E467328}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C851B434-B0EF-A169-CB5B-C5B70E467328}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC2FD6A8-334C-212E-7650-D0FB2345DA4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC2FD6A8-334C-212E-7650-D0FB2345DA4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC2FD6A8-334C-212E-7650-D0FB2345DA4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC2FD6A8-334C-212E-7650-D0FB2345DA4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88511E16-7209-4B98-B5EB-04E5CF46A9AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88511E16-7209-4B98-B5EB-04E5CF46A9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88511E16-7209-4B98-B5EB-04E5CF46A9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88511E16-7209-4B98-B5EB-04E5CF46A9AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

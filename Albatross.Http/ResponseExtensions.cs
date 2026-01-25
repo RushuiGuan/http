@@ -2,6 +2,7 @@
 using System.IO.Compression;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Albatross.Http {
@@ -14,8 +15,8 @@ namespace Albatross.Http {
 		/// </summary>
 		/// <param name="response"></param>
 		/// <returns></returns>
-		public static async Task<Stream> GetContentStream(this HttpResponseMessage response) {
-			var stream = await response.Content.ReadAsStreamAsync();
+		public static async Task<Stream> GetContentStream(this HttpResponseMessage response, CancellationToken cancellationToken) {
+			var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 			if (response.Content.Headers.ContentEncoding.Contains(GZipEncoding)) {
 				var gzip = new GZipStream(stream, CompressionMode.Decompress, leaveOpen: true);
 				return gzip;
@@ -24,12 +25,12 @@ namespace Albatross.Http {
 			}
 		}
 
-		public static async Task<string> ReadResponseAsText(this HttpResponseMessage response, bool resetBaseStream = false) {
+		public static async Task<string> ReadResponseAsText(this HttpResponseMessage response, bool resetBaseStream, CancellationToken cancellationToken) {
 			if (response.Content.Headers.ContentLength != 0) {
-				var stream = await response.GetContentStream();
+				var stream = await response.GetContentStream(cancellationToken);
 				try {
 					using var reader = new StreamReader(stream, leaveOpen: true);
-					return await reader.ReadToEndAsync();
+					return await reader.ReadToEndAsync(cancellationToken);
 				} finally {
 					if (stream is GZipStream gzip) {
 						gzip.Dispose();
@@ -44,10 +45,10 @@ namespace Albatross.Http {
 			}
 		}
 
-		public static async Task<ResultType?> ReadResponseAsJson<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions) {
-			var stream = await response.GetContentStream();
+		public static async Task<ResultType?> ReadResponseAsJson<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
+			var stream = await response.GetContentStream(cancellationToken);
 			try {
-				return await JsonSerializer.DeserializeAsync<ResultType>(stream, serializerOptions);
+				return await JsonSerializer.DeserializeAsync<ResultType>(stream, serializerOptions, cancellationToken);
 			} finally {
 				if (stream is GZipStream gzip) {
 					gzip.Dispose();
@@ -55,22 +56,22 @@ namespace Albatross.Http {
 			}
 		}
 
-		public static async Task<ResultType?> ReadResponse<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions) {
+		public static async Task<ResultType?> ReadResponse<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			if (typeof(ResultType) == typeof(string)) {
-				var content = await response.ReadResponseAsText(false);
+				var content = await response.ReadResponseAsText(false, cancellationToken);
 				return (ResultType?)(object)content;
 			} else {
-				return await response.ReadResponseAsJson<ResultType>(serializerOptions);
+				return await response.ReadResponseAsJson<ResultType>(serializerOptions, cancellationToken);
 			}
 		}
 
-		public static async Task ReadResponseWithOutputStream(this HttpResponseMessage response, Stream outputStream) {
+		public static async Task ReadResponseWithOutputStream(this HttpResponseMessage response, Stream outputStream, CancellationToken cancellationToken) {
 			if (response.Content.Headers.ContentEncoding.Contains(GZipEncoding)) {
-				var responseStream = await response.Content.ReadAsStreamAsync();
+				var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
 				using var gzip = new GZipStream(responseStream, CompressionMode.Decompress, true);
-				await gzip.CopyToAsync(outputStream);
+				await gzip.CopyToAsync(outputStream, cancellationToken);
 			} else {
-				await response.Content.CopyToAsync(outputStream);
+				await response.Content.CopyToAsync(outputStream, cancellationToken);
 			}
 		}
 	}

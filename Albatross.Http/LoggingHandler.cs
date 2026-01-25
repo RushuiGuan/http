@@ -28,7 +28,7 @@ namespace Albatross.Http {
 			try {
 				var response = await base.SendAsync(request, cancellationToken);
 				if (response.StatusCode >= HttpStatusCode.BadRequest) {
-					var body = await response.ReadResponseAsText(true);
+					var body = await response.ReadResponseAsText(true, cancellationToken);
 					logger.LogError("HTTP {method} {uri} completed {statusCode}\n{body}", request.Method, request.RequestUri, (int)response.StatusCode, body);
 				} else {
 					logger.LogDebug("HTTP {method} {uri} completed {statusCode}", request.Method, request.RequestUri, (int)response.StatusCode);
