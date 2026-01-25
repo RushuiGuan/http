@@ -1,0 +1,26 @@
+﻿using System;
+using System.Net;
+using System.Net.Http;
+
+namespace Albatross.WebClient {
+	public class ServiceException<T> : Exception {
+		public HttpStatusCode StatusCode { get; private set; }
+		public string Method { get; set; }
+		public string Endpoint { get; set; }
+		public T? ErrorObject { get; private set; }
+
+		public ServiceException(HttpStatusCode statusCode, HttpMethod method, Uri endpoint, T? errorObject)
+			: base(BuildMessage(statusCode, method, endpoint)) {
+
+			this.StatusCode = statusCode;
+			this.Method = method.ToString();
+			this.Endpoint = endpoint.ToString();
+			this.ErrorObject = errorObject;
+		}
+
+		static string BuildMessage(HttpStatusCode statusCode, HttpMethod method, Uri endpoint) {
+			var msg = $"Received {statusCode} error for {method}@{endpoint}";
+			return msg;
+		}
+	}
+}
