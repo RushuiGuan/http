@@ -152,5 +152,31 @@ namespace Albatross.Http {
 			content.Add(jsonContent, fieldName);
 			return request;
 		}
+
+		/// <summary>
+		/// Gets the full URI from the request, resolving relative URIs against the provided base address.
+		/// </summary>
+		/// <param name="request">The HTTP request message.</param>
+		/// <param name="baseAddress">The base address to use for resolving relative URIs.</param>
+		/// <returns>The full absolute URI.</returns>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the request URI is null and no base address is provided,
+		/// or when the request URI is relative and no base address is provided.
+		/// </exception>
+		public static Uri GetFullUri(this HttpRequestMessage request, Uri? baseAddress) {
+			if (request.RequestUri == null) {
+				if (baseAddress == null) {
+					throw new InvalidOperationException("RequestUri is null and no base address is provided");
+				}
+				return baseAddress;
+			}
+			if (request.RequestUri.IsAbsoluteUri) {
+				return request.RequestUri;
+			}
+			if (baseAddress == null) {
+				throw new InvalidOperationException("RequestUri is relative and no base address is provided");
+			}
+			return new Uri(baseAddress, request.RequestUri);
+		}
 	}
 }

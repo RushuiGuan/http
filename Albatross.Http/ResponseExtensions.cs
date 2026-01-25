@@ -55,7 +55,7 @@ namespace Albatross.Http {
 			}
 		}
 
-		public static async Task<ResultType?> ReadResponseAuto<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions) {
+		public static async Task<ResultType?> ReadResponse<ResultType>(this HttpResponseMessage response, JsonSerializerOptions serializerOptions) {
 			if (typeof(ResultType) == typeof(string)) {
 				var content = await response.ReadResponseAsText(false);
 				return (ResultType?)(object)content;
