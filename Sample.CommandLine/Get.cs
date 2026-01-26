@@ -24,8 +24,6 @@ namespace Sample.CommandLine {
 		public async Task<int> InvokeAsync(CancellationToken cancellationToken) {
 			logger.LogDebug("Invoking Get command");
 			logger.LogInformation("Starting Get command with delay {delay}ms", parameters.Delay);
-
-
 			var result = await client.Get(parameters.Delay, cancellationToken);
 			System.Console.WriteLine($"Result: {result}");
 			return 0;

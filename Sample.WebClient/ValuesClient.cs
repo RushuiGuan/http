@@ -21,5 +21,13 @@ namespace Sample.WebClient {
 			var result = await client.Execute<string, string>(request, serializerOptions, cancellationToken);
 			return result;
 		}
+
+		public async Task<string?> PostError(int statusCode, string body, CancellationToken cancellationToken) {
+			using var request = RequestExtensions.CreateRequest(HttpMethod.Post, "/api/values/error", new System.Collections.Specialized.NameValueCollection {
+				{ "statusCode", statusCode.ToString() }
+			}).CreateStringRequest(body);
+			var result = await client.Execute<string, string>(request, serializerOptions, cancellationToken);
+			return result;
+		}
 	}
 }

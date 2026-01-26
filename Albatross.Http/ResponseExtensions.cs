@@ -36,9 +36,6 @@ namespace Albatross.Http {
 						gzip.Dispose();
 						stream = gzip.BaseStream;
 					}
-					if (resetBaseStream) {
-						stream.Seek(0, SeekOrigin.Begin);
-					}
 				}
 			} else {
 				return string.Empty;

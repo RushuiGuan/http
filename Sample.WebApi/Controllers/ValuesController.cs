@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sample.WebApi.Controllers {
@@ -9,16 +10,21 @@ namespace Sample.WebApi.Controllers {
 	public class ValuesController : ControllerBase {
 		private readonly ILogger logger;
 
-		public ValuesController(ILogger logger) {
+		public ValuesController(ILogger<ValuesController> logger) {
 			this.logger = logger;
 		}
 
 		[HttpGet]
-		public async Task<string> Get(int delay) {
-			if (delay > 0) {
-				await Task.Delay(delay);
+		public async Task<string> Get(int delay, CancellationToken cancellationToken) {
+			try {
+				if (delay > 0) {
+					await Task.Delay(delay, cancellationToken);
+				}
+				return DateTime.UtcNow.ToString();
+			} catch (OperationCanceledException) {
+				logger.LogInformation("Get operation was canceled");
+				throw;
 			}
-			return DateTime.UtcNow.ToString();
 		}
 
 		[HttpGet("datetime")]
@@ -58,6 +64,15 @@ namespace Sample.WebApi.Controllers {
 		[HttpGet("comporession-test")]
 		public string CompressionTest(int count) {
 			return new string('A', count);
+		}
+
+		[HttpPost("error")]
+		public ContentResult PostError([FromQuery] int statusCode, [FromBody] string body) {
+			return new ContentResult {
+				StatusCode = statusCode,
+				Content = body,
+				ContentType = "text/plain",
+			};
 		}
 	}
 }

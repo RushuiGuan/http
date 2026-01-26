@@ -11,6 +11,10 @@ namespace Sample.WebClient {
 				var config = provider.GetRequiredService<SampleConfig>();
 				client.BaseAddress = new Uri(config.EndPoint);
 			}).RemoveAllLoggers().AddHttpMessageHandler<LoggingHandler>();
+			services.AddHttpClient<ExceptionTestCaseClient>((provider, client) => {
+				var config = provider.GetRequiredService<SampleConfig>();
+				client.BaseAddress = new Uri(config.EndPoint);
+			}).RemoveAllLoggers().AddHttpMessageHandler<LoggingHandler>();
 			return services;
 		}
 	}

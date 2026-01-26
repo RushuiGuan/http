@@ -4,7 +4,12 @@
       "Bash(dotnet test:*)",
       "Bash(git mv:*)",
       "Bash(dotnet build:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(dotnet list:*)",
+      "WebFetch(domain:rushuiguan.github.io)",
+      "Bash(findstr:*)",
+      "Bash(dir /b \"C:\\\\app\\\\http\\\\Sample.CommandLine\\\\*.cs\")",
+      "Bash(ls:*)"
     ]
   }
 }
