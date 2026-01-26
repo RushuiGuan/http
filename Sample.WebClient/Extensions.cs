@@ -10,7 +10,7 @@ namespace Sample.WebClient {
 			services.AddHttpClient<ValuesClient>((provider, client) => {
 				var config = provider.GetRequiredService<SampleConfig>();
 				client.BaseAddress = new Uri(config.EndPoint);
-			}).AddHttpMessageHandler<LoggingHandler>();
+			}).RemoveAllLoggers().AddHttpMessageHandler<LoggingHandler>();
 			return services;
 		}
 	}
