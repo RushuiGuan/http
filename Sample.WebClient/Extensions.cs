@@ -10,7 +10,14 @@ namespace Sample.WebClient {
 			services.AddHttpClient<ValuesClient>((provider, client) => {
 				var config = provider.GetRequiredService<SampleConfig>();
 				client.BaseAddress = new Uri(config.EndPoint);
-			}).RemoveAllLoggers().AddHttpMessageHandler<LoggingHandler>();
+			}).RemoveAllLoggers()
+			.ConfigurePrimaryHttpMessageHandler(() => {
+				return new HttpClientHandler {
+					AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate | System.Net.DecompressionMethods.Brotli
+				};
+			})
+			.AddHttpMessageHandler<LoggingHandler>();
+
 			services.AddHttpClient<ExceptionTestCaseClient>((provider, client) => {
 				var config = provider.GetRequiredService<SampleConfig>();
 				client.BaseAddress = new Uri(config.EndPoint);

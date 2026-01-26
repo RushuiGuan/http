@@ -3,6 +3,11 @@ using System.Net;
 using System.Net.Http;
 
 namespace Albatross.WebClient {
+	public class ServiceException : ServiceException<string> {
+		public ServiceException(HttpStatusCode statusCode, HttpMethod method, Uri endpoint, string? errorMsg)
+			: base(statusCode, method, endpoint, errorMsg) {
+		}
+	}
 	public class ServiceException<T> : Exception {
 		public HttpStatusCode StatusCode { get; private set; }
 		public string Method { get; set; }
@@ -19,7 +24,7 @@ namespace Albatross.WebClient {
 		}
 
 		static string BuildMessage(HttpStatusCode statusCode, HttpMethod method, Uri endpoint) {
-			var msg = $"Received {statusCode} error for {method}@{endpoint}";
+			var msg = $"Status:{(int)statusCode}; Method:{method}; Endpoint:{endpoint}";
 			return msg;
 		}
 	}

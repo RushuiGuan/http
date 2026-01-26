@@ -65,14 +65,5 @@ namespace Sample.WebApi.Controllers {
 		public string CompressionTest(int count) {
 			return new string('A', count);
 		}
-
-		[HttpPost("error")]
-		public ContentResult PostError([FromQuery] int statusCode, [FromBody] string body) {
-			return new ContentResult {
-				StatusCode = statusCode,
-				Content = body,
-				ContentType = "text/plain",
-			};
-		}
 	}
 }
