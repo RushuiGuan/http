@@ -17,7 +17,7 @@ namespace Albatross.Http {
 	public class RequestBuilder {
 		private HttpMethod _method = HttpMethod.Get;
 		private string? _relativeUrl;
-		private JsonSerializerOptions _serializerOptions = DefaultJsonSerializationOptions.Value;
+		private JsonSerializerOptions _serializerOptions = DefaultJsonSerializerOptions.Value;
 		private HttpContent? _content;
 		readonly NameValueCollection _queryString = new NameValueCollection();
 		
@@ -173,7 +173,7 @@ namespace Albatross.Http {
 		public RequestBuilder Reset() {
 			_method = HttpMethod.Get;
 			_relativeUrl = null;
-			_serializerOptions = DefaultJsonSerializationOptions.Value;
+			_serializerOptions = DefaultJsonSerializerOptions.Value;
 			_content = null;
 			_queryString.Clear();
 			return this;
