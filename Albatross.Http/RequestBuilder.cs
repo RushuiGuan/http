@@ -173,7 +173,7 @@ namespace Albatross.Http {
 		public RequestBuilder Reset() {
 			_method = HttpMethod.Get;
 			_relativeUrl = null;
-			_serializerOptions = defaultSerializerOptions;
+			_serializerOptions = DefaultJsonSerializationOptions.Value;
 			_content = null;
 			_queryString.Clear();
 			return this;
