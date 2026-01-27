@@ -9,6 +9,10 @@ using System.Threading.Tasks;
 
 namespace Albatross.Http {
 	public static class HttpClientExtensions {
+		/// <summary>
+		/// Sends the HTTP request and deserializes the response, using <see cref="string"/> as the error type.
+		/// </summary>
+		/// <inheritdoc cref="Execute{TResponse, TError}"/>
 		public static Task<TResponse?> Execute<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
 			=> Execute<TResponse, string>(client, request, serializerOptions, cancellationToken);
 

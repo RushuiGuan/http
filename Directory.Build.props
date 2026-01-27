@@ -2,15 +2,25 @@
 <Project>
 	<PropertyGroup>
 		<Version>1.0.0</Version>
-		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
-		<EnableWindowsTargeting>True</EnableWindowsTargeting>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<RepositoryUrl>https://github.com/RushuiGuan/http</RepositoryUrl>
-		<RepositoryProjectRoot>$(RepositoryUrl)/tree/main</RepositoryProjectRoot>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageProjectUrl>https://rushuiguan.github.io/http/</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
 		<Authors>Rushui Guan</Authors>
+		<PackageTags>httpclient</PackageTags>
+		<PackageReleaseNotes>See https://rushuiguan.github.io/http/release-notes</PackageReleaseNotes>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<RepositoryType>git</RepositoryType>
 	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 </Project>

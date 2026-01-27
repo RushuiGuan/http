@@ -15,7 +15,7 @@ dotnet build Albatross.Http/Albatross.Http.csproj
 dotnet test
 
 # Run a specific test
-dotnet test --filter "FullyQualifiedName~TestExtensions.CreateUrl_WithNoQueryString_ReturnsUrl"
+dotnet test --filter "FullyQualifiedName~TestCreateUrl.WithNullQueryString_ReturnsUrlOnly"
 
 # Create NuGet package
 dotnet pack Albatross.Http/Albatross.Http.csproj
@@ -26,20 +26,21 @@ dotnet pack Albatross.Http/Albatross.Http.csproj
 This is a .NET library (`Albatross.Http`) providing HttpClient extensions for HTTP client code generation.
 
 ### Target Frameworks
-- `netstandard2.1` and `net8.0` for the main library
-- `net8.0` for tests
+- `net8.0` for the main library and tests
 
-### Namespaces
-The library uses two namespaces:
-- `Albatross.Http` - Core extensions (URL building, request/response handling, content types)
-- `Albatross.WebClient` - Service exception and HttpClient execution methods
+### Namespace
+All types are in the `Albatross.Http` namespace.
 
 ### Key Components
-- **RequestExtensions**: Factory methods for creating `HttpRequestMessage` with JSON, string, stream, or multipart form content
-- **ResponseExtensions**: Methods for reading responses as text, JSON, or streams with automatic GZip decompression
-- **UrlExtensions**: Query string building and URL batching for large array parameters
-- **HttpClientExtensions**: Execute methods that handle request/response with typed error handling via `ServiceException<T>`
-- **ContentTypes**: MIME type constants
+- **RequestBuilder**: Fluent builder for creating `HttpRequestMessage` with JSON, string, stream, form, or multipart form content. Supports query string helpers for DateTime, DateOnly, TimeOnly, and DateTimeOffset. Resets automatically after `Build()`.
+- **HttpClientExtensions**: Execute methods that handle request/response with typed error handling via `ServiceException<T>`. Includes `ExecuteOrThrow` (reference types), `ExecuteOrThrowStruct` (value types), and `ExecuteAsStream` (streaming `IAsyncEnumerable` responses).
+- **UrlExtensions**: Query string building, URL batching for large array parameters, and `GetFullUri` for resolving relative URIs against a base address.
+- **ServiceException**: Typed exception carrying HTTP status code, method, endpoint, and a deserialized error object.
+- **LoggingHandler**: `DelegatingHandler` for structured logging of HTTP request/response details via `ILogger`.
+- **ContentTypes**: MIME type constants.
 
 ### Testing
-Uses xUnit with FluentAssertions. Test project: `Albatross.Http.Test`
+Uses xUnit. Test project: `Albatross.Http.Test`
+
+### Sample Projects
+`Sample.WebApi`, `Sample.WebClient`, and `Sample.CommandLine` are for internal testing and demonstration only. Do not add documentation (XML doc comments, README, release notes, etc.) to these projects.
