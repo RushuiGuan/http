@@ -9,7 +9,9 @@
       "WebFetch(domain:rushuiguan.github.io)",
       "Bash(findstr:*)",
       "Bash(dir /b \"C:\\\\app\\\\http\\\\Sample.CommandLine\\\\*.cs\")",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
