@@ -8,6 +8,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Albatross.Http {
+	/// <summary>
+	/// Fluent builder for constructing <see cref="HttpRequestMessage"/> instances with support for
+	/// JSON, text, stream, form URL-encoded, and multipart form data content types.
+	/// Includes typed query string helpers for date/time types.
+	/// The builder resets its state after each call to <see cref="Build"/>, allowing reuse.
+	/// </summary>
 	public class RequestBuilder {
 		private HttpMethod _method = HttpMethod.Get;
 		private string? _relativeUrl;
@@ -178,6 +184,9 @@ namespace Albatross.Http {
 			return this;
 		}
 
+		/// <summary>
+		/// Builds the <see cref="HttpRequestMessage"/> from the current builder state and resets the builder for reuse.
+		/// </summary>
 		public HttpRequestMessage Build() {
 			var url = _relativeUrl.CreateUrl(this._queryString);
 			if(url.Length > 0 && url[^1] == '&') {

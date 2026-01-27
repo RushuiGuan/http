@@ -28,6 +28,19 @@ namespace Albatross.Http {
 			}
 		}
 
+		/// <summary>
+		/// Sends the HTTP request and deserializes the response as <typeparamref name="TResponse"/>.
+		/// Returns null for 204 No Content or zero-length responses.
+		/// Throws <see cref="ServiceException{TError}"/> if the response status code indicates an error (400+).
+		/// </summary>
+		/// <typeparam name="TResponse">The expected response type.</typeparam>
+		/// <typeparam name="TError">The error type to deserialize when the response indicates a failure.</typeparam>
+		/// <param name="client">The HTTP client.</param>
+		/// <param name="request">The HTTP request message to send.</param>
+		/// <param name="serializerOptions">The JSON serializer options for deserialization.</param>
+		/// <param name="cancellationToken">A cancellation token.</param>
+		/// <returns>The deserialized response, or null if the response has no content.</returns>
+		/// <exception cref="ServiceException{TError}">Thrown when the response status code indicates an error (400+).</exception>
 		public static async Task<TResponse?> Execute<TResponse, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
