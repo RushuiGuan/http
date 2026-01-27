@@ -1,5 +1,4 @@
 ﻿using Albatross.Http;
-using Albatross.WebClient;
 using System.Text.Json;
 
 namespace Sample.WebClient {
@@ -15,9 +14,7 @@ namespace Sample.WebClient {
 		}
 
 		public async Task<string?> Get(int delay, CancellationToken cancellationToken) {
-			using var request = RequestExtensions.CreateRequest(HttpMethod.Get, "/api/values", new System.Collections.Specialized.NameValueCollection {
-				{ "delay", delay.ToString() }
-			});
+			using var request = new RequestBuilder().WithMethod(HttpMethod.Get).WithRelativeUrl("/api/values").AddQueryString("delay", delay.ToString()).Build();
 			var result = await client.Execute<string, string>(request, serializerOptions, cancellationToken);
 			return result;
 		}

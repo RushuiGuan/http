@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Http;
 
-namespace Albatross.WebClient {
+namespace Albatross.Http {
 	public class ServiceException : ServiceException<string> {
 		public ServiceException(HttpStatusCode statusCode, HttpMethod method, Uri endpoint, string? errorMsg)
 			: base(statusCode, method, endpoint, errorMsg) {

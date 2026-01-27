@@ -1,6 +1,5 @@
 using Albatross.CommandLine;
 using Albatross.CommandLine.Annotations;
-using Albatross.WebClient;
 using Microsoft.Extensions.Logging;
 using Sample.WebClient;
 using System;

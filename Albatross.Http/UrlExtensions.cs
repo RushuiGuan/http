@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net.Http;
 using System.Text;
 
 namespace Albatross.Http {
@@ -105,7 +106,8 @@ namespace Albatross.Http {
 		/// <param name="url">The base URL or relative path (e.g., "api/items").</param>
 		/// <param name="queryStringValues">The query string parameters to append. Can be null or empty.</param>
 		/// <returns>A <see cref="StringBuilder"/> containing the URL with query parameters, suitable for further modification.</returns>
-		public static StringBuilder CreateUrl(this string url, NameValueCollection? queryStringValues) {
+		public static StringBuilder CreateUrl(this string? url, NameValueCollection? queryStringValues) {
+			url = url ?? string.Empty;
 			var sb = new StringBuilder(url);
 			if (queryStringValues?.Count > 0) {
 
@@ -118,7 +120,7 @@ namespace Albatross.Http {
 				}
 
 				for (int i = 0; i < queryStringValues.Count; i++) {
-					string[] values = queryStringValues.GetValues(i) ?? new string[0];
+					string[] values = queryStringValues.GetValues(i) ?? Array.Empty<string>();
 					string key = queryStringValues.GetKey(i) ?? string.Empty;
 					foreach (string value in values) {
 						sb.AddQueryParam(key, value);
@@ -127,11 +129,37 @@ namespace Albatross.Http {
 			}
 			return sb;
 		}
-		static internal void AddQueryParam(this StringBuilder sb, string key, string value) {
+		internal static void AddQueryParam(this StringBuilder sb, string key, string value) {
 			sb.Append(Uri.EscapeDataString(key));
 			sb.Append("=");
 			sb.Append(Uri.EscapeDataString(value));
 			sb.Append("&");
+		}
+
+		/// <summary>
+		/// Gets the full URI from the request, resolving relative URIs against the provided base address.
+		/// </summary>
+		/// <param name="request">The HTTP request message.</param>
+		/// <param name="baseAddress">The base address to use for resolving relative URIs.</param>
+		/// <returns>The full absolute URI.</returns>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the request URI is null and no base address is provided,
+		/// or when the request URI is relative and no base address is provided.
+		/// </exception>
+		public static Uri GetFullUri(this HttpRequestMessage request, Uri? baseAddress) {
+			if (request.RequestUri == null) {
+				if (baseAddress == null) {
+					throw new InvalidOperationException("RequestUri is null and no base address is provided");
+				}
+				return baseAddress;
+			}
+			if (request.RequestUri.IsAbsoluteUri) {
+				return request.RequestUri;
+			}
+			if (baseAddress == null) {
+				throw new InvalidOperationException("RequestUri is relative and no base address is provided");
+			}
+			return new Uri(baseAddress, request.RequestUri);
 		}
 	}
 }
