@@ -17,15 +17,10 @@ namespace Albatross.Http {
 	public class RequestBuilder {
 		private HttpMethod _method = HttpMethod.Get;
 		private string? _relativeUrl;
-		private JsonSerializerOptions _serializerOptions = defaultSerializerOptions;
+		private JsonSerializerOptions _serializerOptions = DefaultJsonSerializationOptions.Value;
 		private HttpContent? _content;
 		readonly NameValueCollection _queryString = new NameValueCollection();
-
-		static readonly JsonSerializerOptions defaultSerializerOptions = new JsonSerializerOptions {
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-			WriteIndented = false,
-			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-		};
+		
 		public RequestBuilder UseSerializationOptions(JsonSerializerOptions options) {
 			this._serializerOptions = options;
 			return this;
