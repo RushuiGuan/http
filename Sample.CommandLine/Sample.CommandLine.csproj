@@ -8,12 +8,12 @@
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)Generated</CompilerGeneratedFilesOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-	  <PackageReference Include="Albatross.CommandLine" Version="8.0.7" />
-	  <PackageReference Include="Albatross.CommandLine.Defaults" Version="8.0.7" />
-	  <PackageReference Include="Albatross.CommandLine.Inputs" Version="8.0.7" />
+		<PackageReference Include="Albatross.CommandLine" Version="8.0.7" />
+		<PackageReference Include="Albatross.CommandLine.Defaults" Version="8.0.7" />
+		<PackageReference Include="Albatross.CommandLine.Inputs" Version="8.0.7" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\Sample.WebClient\Sample.WebClient.csproj" />
+		<ProjectReference Include="..\Sample.WebClient\Sample.WebClient.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="appsettings.json">

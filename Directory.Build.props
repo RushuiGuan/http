@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 	<PropertyGroup>
-		<Version>1.0.0</Version>
+		<Version>1.0.0-11.main+97cadba</Version>
 		<LangVersion>Latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<RepositoryUrl>https://github.com/RushuiGuan/http</RepositoryUrl>
-		<PackageProjectUrl>https://rushuiguan.github.io/http/</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageIcon>icon.png</PackageIcon>
 		<Authors>Rushui Guan</Authors>
 		<PackageTags>httpclient</PackageTags>
 		<PackageReleaseNotes>See https://rushuiguan.github.io/http/release-notes</PackageReleaseNotes>
