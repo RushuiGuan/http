@@ -1,7 +1,8 @@
-﻿using Albatross.Http;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,6 +65,7 @@ namespace Albatross.Http {
 				return result;
 			}
 		}
+
 		/// <summary>
 		/// Sends the HTTP request and returns a guaranteed response of the specified value type.
 		/// Throws <see cref="ServiceException{TError}"/> if the response indicates an error,
@@ -93,6 +95,31 @@ namespace Albatross.Http {
 					throw new ServiceException(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), "Expected content but none were returned from the service");
 				}
 				return result.Value;
+			}
+		}
+
+		/// <summary>
+		/// Sends the HTTP request and streams the response as an async enumerable of items, yielding each item as it is
+		/// deserialized from the response stream. Designed for endpoints that use <c>yield return</c> or return
+		/// <see cref="IAsyncEnumerable{T}"/>. Uses <see cref="HttpCompletionOption.ResponseHeadersRead"/> to begin
+		/// processing before the full response is received.
+		/// </summary>
+		/// <typeparam name="TItem">The type of each item in the streamed array.</typeparam>
+		/// <typeparam name="TError">The error type to deserialize when the response indicates a failure.</typeparam>
+		/// <param name="client">The HTTP client.</param>
+		/// <param name="request">The HTTP request message to send.</param>
+		/// <param name="serializerOptions">The JSON serializer options for deserialization.</param>
+		/// <param name="cancellationToken">A cancellation token.</param>
+		/// <returns>An async enumerable of deserialized items of type <typeparamref name="TItem"/>. Items may be null if the JSON array contains null elements.</returns>
+		/// <exception cref="ServiceException{TError}">Thrown when the response status code indicates an error (400+).</exception>
+		public static async IAsyncEnumerable<TItem?> ExecuteAsStream<TItem, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, [EnumeratorCancellation] CancellationToken cancellationToken) {
+			using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+			if (response.StatusCode >= HttpStatusCode.BadRequest) {
+				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
+				throw new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+			}
+			await foreach (var item in response.Content.ReadFromJsonAsAsyncEnumerable<TItem>(serializerOptions, cancellationToken)) {
+				yield return item;
 			}
 		}
 	}

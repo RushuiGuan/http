@@ -43,14 +43,14 @@ namespace Sample.WebClient {
 			return await client.Execute<string>(request, serializerOptions, cancellationToken);
 		}
 
-		public async Task<string?> ThrowAfterAsyncEnumerable(CancellationToken cancellationToken) {
-			using var request = new RequestBuilder().WithMethod(HttpMethod.Get).WithRelativeUrl("/api/ExceptionTestCase/throw-after-async-enumerable").Build();
-			return await client.Execute<string>(request, serializerOptions, cancellationToken);
+		public IAsyncEnumerable<int> ThrowAfterAsyncEnumerable(CancellationToken cancellationToken) {
+			var request = new RequestBuilder().WithMethod(HttpMethod.Get).WithRelativeUrl("/api/ExceptionTestCase/throw-after-async-enumerable").Build();
+			return client.ExecuteAsStream<int, string>(request, serializerOptions, cancellationToken);
 		}
 
-		public async Task<string?> ThrowAfterYieldReturn(CancellationToken cancellationToken) {
-			using var request = new RequestBuilder().WithMethod(HttpMethod.Get).WithRelativeUrl("/api/ExceptionTestCase/throw-after-yield-return").Build();
-			return await client.Execute<string>(request, serializerOptions, cancellationToken);
+		public IAsyncEnumerable<int> ThrowAfterYieldReturn(CancellationToken cancellationToken) {
+			var request = new RequestBuilder().WithMethod(HttpMethod.Get).WithRelativeUrl("/api/ExceptionTestCase/throw-after-yield-return").Build();
+			return client.ExecuteAsStream<int, string>(request, serializerOptions, cancellationToken);
 		}
 	}
 }

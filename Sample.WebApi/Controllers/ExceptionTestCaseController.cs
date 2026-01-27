@@ -52,6 +52,7 @@ namespace Sample.WebApi.Controllers {
 		public async IAsyncEnumerable<int> ThrowAfterAsyncEnumerable() {
 			await Task.Delay(1);
 			for (int i = 0; i < 100; i++) {
+				await Task.Delay(10);
 				yield return i;
 			}
 			throw new ArgumentException("this is a test exception");

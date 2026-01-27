@@ -24,19 +24,30 @@ namespace Sample.CommandLine {
 		}
 
 		public override async Task<int> InvokeAsync(CancellationToken cancellationToken) {
-			string? result = parameters.Action switch {
-				"problem" => await client.SendViaProblemMethod(cancellationToken),
-				"exception" => await client.ThrowException(cancellationToken),
-				"text-http-api-exception" => await client.ThrowTextHttpApiException(cancellationToken),
-				"json-http-api-exception" => await client.ThrowJsonHttpApiException(cancellationToken),
-				"argument-exception" => await client.ThrowArgumentException(cancellationToken),
-				"inner-exception" => await client.ThrowExceptionWithInnerException(cancellationToken),
-				"async-enumerable" => await client.ThrowAfterAsyncEnumerable(cancellationToken),
-				"yield-return" => await client.ThrowAfterYieldReturn(cancellationToken),
-				_ => throw new ArgumentException($"Unknown action: {parameters.Action}"),
-			};
-			Console.WriteLine($"Unexpected success response: {result}");
-			return 1;
+			switch (parameters.Action) {
+				case "async-enumerable":
+				case "yield-return":
+					var stream = parameters.Action == "async-enumerable"
+						? client.ThrowAfterAsyncEnumerable(cancellationToken)
+						: client.ThrowAfterYieldReturn(cancellationToken);
+					await foreach (var item in stream) {
+						Console.WriteLine($"Received: {item}");
+					}
+					Console.WriteLine("Unexpected: stream completed without error");
+					return 1;
+				default:
+					string? result = parameters.Action switch {
+						"problem" => await client.SendViaProblemMethod(cancellationToken),
+						"exception" => await client.ThrowException(cancellationToken),
+						"text-http-api-exception" => await client.ThrowTextHttpApiException(cancellationToken),
+						"json-http-api-exception" => await client.ThrowJsonHttpApiException(cancellationToken),
+						"argument-exception" => await client.ThrowArgumentException(cancellationToken),
+						"inner-exception" => await client.ThrowExceptionWithInnerException(cancellationToken),
+						_ => throw new ArgumentException($"Unknown action: {parameters.Action}"),
+					};
+					Console.WriteLine($"Unexpected success response: {result}");
+					return 1;
+			}
 		}
 	}
 }
