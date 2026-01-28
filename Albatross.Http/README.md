@@ -4,10 +4,12 @@ A companion library for `HttpClient` that simplifies building HTTP requests, exe
 
 ## Key Features
 
-- **RequestBuilder** - Fluent API for constructing `HttpRequestMessage` with JSON, text, stream, form, and multipart form data content. Includes typed query string helpers for date/time types.
-- **Typed Execute methods** - Send requests and deserialize responses with automatic error handling via `ServiceException<T>`. Separate methods for nullable results, guaranteed non-null reference types, and guaranteed value types.
+- **RequestBuilder** - Fluent API for constructing `HttpRequestMessage` with JSON, text, stream, form, and multipart form data content.
+- **RequestBuilderExtensions** - Extension methods for optional query string parameters with `AddQueryStringIfSet<T>`, including automatic ISO8601 formatting for date/time types.
+- **Typed Execute methods** - Send requests and deserialize responses with automatic error handling via `ServiceException<T>`. Includes `Send`, `Execute`, `ExecuteOrThrow`, `ExecuteOrThrowStruct`, and `ExecuteAsStream` with simplified overloads that default the error type to `string`.
 - **Streaming support** - `ExecuteAsStream` for consuming `IAsyncEnumerable` endpoints with true streaming via `HttpCompletionOption.ResponseHeadersRead`.
-- **URL utilities** - Query string building, URL batching for large array parameters, and relative URI resolution.
+- **URL utilities** - Query string building, URL batching for large array parameters, relative URI resolution, and ISO8601 formatting helpers.
+- **DefaultJsonSerializerOptions** - Shared `JsonSerializerOptions` with camelCase naming and null-ignoring behavior.
 - **Structured logging** - `LoggingHandler` integrates with `ILogger` for HTTP request/response logging.
 
 ## Quick Start
