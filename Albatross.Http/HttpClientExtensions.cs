@@ -9,13 +9,6 @@ using System.Threading.Tasks;
 
 namespace Albatross.Http {
 	public static class HttpClientExtensions {
-		/// <summary>
-		/// Sends the HTTP request and deserializes the response, using <see cref="string"/> as the error type.
-		/// </summary>
-		/// <inheritdoc cref="Execute{TResponse, TError}"/>
-		public static Task<TResponse?> Execute<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
-			=> Execute<TResponse, string>(client, request, serializerOptions, cancellationToken);
-
 		static async Task<T?> ReadResponse<T>(HttpResponseMessage response, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
 				return default;
@@ -27,6 +20,13 @@ namespace Albatross.Http {
 				}
 			}
 		}
+
+		/// <summary>
+		/// Sends the HTTP request and deserializes the response, using <see cref="string"/> as the error type.
+		/// </summary>
+		/// <inheritdoc cref="Execute{TResponse, TError}"/>
+		public static Task<TResponse?> Execute<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
+			=> Execute<TResponse, string>(client, request, serializerOptions, cancellationToken);
 
 		/// <summary>
 		/// Sends the HTTP request and deserializes the response as <typeparamref name="TResponse"/>.
@@ -83,6 +83,9 @@ namespace Albatross.Http {
 			}
 		}
 
+		public static Task<TResponse> ExecuteOrThrow<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : class
+			=> ExecuteOrThrow<TResponse, string>(client, request, serializerOptions, cancellationToken);
+
 		/// <summary>
 		/// Sends the HTTP request and returns a guaranteed response of the specified value type.
 		/// Throws <see cref="ServiceException{TError}"/> if the response indicates an error,
@@ -114,6 +117,8 @@ namespace Albatross.Http {
 				return result.Value;
 			}
 		}
+		public static Task<TResponse> ExecuteOrThrowStruct<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct 
+			=> ExecuteOrThrowStruct<TResponse, string>(client, request, serializerOptions, cancellationToken);
 
 		/// <summary>
 		/// Sends the HTTP request and streams the response as an async enumerable of items, yielding each item as it is
@@ -139,5 +144,7 @@ namespace Albatross.Http {
 				yield return item;
 			}
 		}
+		public static IAsyncEnumerable<TItem?> ExecuteAsStream<TItem>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, [EnumeratorCancellation] CancellationToken cancellationToken) 
+			=> ExecuteAsStream<TItem, string>(client, request, serializerOptions, cancellationToken);
 	}
 }
