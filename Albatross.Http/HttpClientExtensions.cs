@@ -51,6 +51,14 @@ namespace Albatross.Http {
 				return result;
 			}
 		}
+		
+		public static async Task Send<TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
+			using var response = await client.SendAsync(request, cancellationToken);
+			if (response.StatusCode >= HttpStatusCode.BadRequest) {
+				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
+				throw new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+			}
+		}
 
 		/// <summary>
 		/// Sends the HTTP request and returns a guaranteed non-null response of the specified reference type.
