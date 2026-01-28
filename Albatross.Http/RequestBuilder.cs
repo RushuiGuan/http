@@ -40,7 +40,7 @@ namespace Albatross.Http {
 			return this;
 		}
 
-		public RequestBuilder AddQueryStringIfSet(string name, IEnumerable<string?> values) {
+		public RequestBuilder AddQueryStringIfSet(string name, params IEnumerable<string?> values) {
 			foreach (var value in values) {
 				if (string.IsNullOrEmpty(value)) {
 					this._queryString.Add(name, value);
