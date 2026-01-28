@@ -9,6 +9,13 @@ namespace Albatross.Http {
 			}
 			return builder;
 		}
+		
+		public static RequestBuilder AddQueryStringStruct<T>(this RequestBuilder builder, string name, T? value) where T : struct {
+			if (value.HasValue) {
+				builder.AddQueryString(name, $"{value.Value}");
+			}
+			return builder;
+		}
 
 		public static RequestBuilder AddDateTimeQueryString(this RequestBuilder builder, string name, DateTime? value) {
 			if (value.HasValue) {
