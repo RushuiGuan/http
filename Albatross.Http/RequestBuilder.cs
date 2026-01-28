@@ -39,36 +39,7 @@ namespace Albatross.Http {
 			this._queryString.Add(name, value);
 			return this;
 		}
-
-		public RequestBuilder AddQueryStringIfSet(string name, params IEnumerable<string?> values) {
-			foreach (var value in values) {
-				if (string.IsNullOrEmpty(value)) {
-					this._queryString.Add(name, value);
-				}
-			}
-			return this;
-		}
-
-		public RequestBuilder AddDateTimeQueryString(string name, DateTime value) {
-			this._queryString.Add(name, value.ToString("o"));
-			return this;
-		}
-
-		public RequestBuilder AddDateOnlyQueryString(string name, DateOnly value) {
-			this._queryString.Add(name, value.ToString("yyyy-MM-dd"));
-			return this;
-		}
-
-		public RequestBuilder AddTimeOnlyQueryString(string name, TimeOnly value) {
-			this._queryString.Add(name, value.ToString("HH:mm:ss.fffffff").TrimEnd('0').TrimEnd('.'));
-			return this;
-		}
-
-		public RequestBuilder AddDateTimeOffsetQueryString(string name, DateTimeOffset value) {
-			this._queryString.Add(name, value.ToString("o"));
-			return this;
-		}
-
+		
 		public RequestBuilder CreateJsonRequest<T>(T? t) {
 			if (t != null) {
 				var text = JsonSerializer.Serialize<T>(t, this._serializerOptions);
