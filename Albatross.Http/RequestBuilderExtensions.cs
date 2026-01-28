@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace Albatross.Http {
 	public static class RequestBuilderExtensions {
+		public static RequestBuilder AddQueryString<T>(this RequestBuilder builder, string name, T value) where T : notnull {
+			builder.AddQueryString(name, value.ToString());
+			return builder;
+		}
+
 		public static RequestBuilder AddQueryStringIfSet<T>(this RequestBuilder builder, string name, T? value) where T : class {
 			if (value != null) {
 				var text = value.ToString();

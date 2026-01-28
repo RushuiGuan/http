@@ -35,7 +35,7 @@ namespace Albatross.Http {
 			return this;
 		}
 
-		public RequestBuilder AddQueryString(string name, string value) {
+		public RequestBuilder AddQueryString(string name, string? value) {
 			this._queryString.Add(name, value);
 			return this;
 		}
