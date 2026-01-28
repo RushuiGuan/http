@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Albatross.Http {
 	public static class RequestBuilderExtensions {
-		public static RequestBuilder AddQueryStringsIfSet(this RequestBuilder builder, string name, string? value) {
+		public static RequestBuilder AddQueryStringIfSet(this RequestBuilder builder, string name, string? value) {
 			if (!string.IsNullOrEmpty(value)) {
 				builder.AddQueryString(name, value);
 			}
