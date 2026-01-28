@@ -3,14 +3,17 @@ using System.Collections.Generic;
 
 namespace Albatross.Http {
 	public static class RequestBuilderExtensions {
-		public static RequestBuilder AddQueryStringIfSet(this RequestBuilder builder, string name, string? value) {
-			if (!string.IsNullOrEmpty(value)) {
-				builder.AddQueryString(name, value);
+		public static RequestBuilder AddQueryStringIfSet<T>(this RequestBuilder builder, string name, T? value) where T : class {
+			if (value != null) {
+				var text = value.ToString();
+				if (!string.IsNullOrEmpty(text)) {
+					builder.AddQueryString(name, text);
+				}
 			}
 			return builder;
 		}
-		
-		public static RequestBuilder AddQueryStringStruct<T>(this RequestBuilder builder, string name, T? value) where T : struct {
+
+		public static RequestBuilder AddQueryStringIfSet<T>(this RequestBuilder builder, string name, T? value) where T : struct {
 			if (value.HasValue) {
 				builder.AddQueryString(name, $"{value.Value}");
 			}
@@ -32,7 +35,7 @@ namespace Albatross.Http {
 		}
 
 		public static RequestBuilder AddTimeOnlyQueryString(this RequestBuilder builder, string name, TimeOnly? value) {
-			if(value.HasValue) {
+			if (value.HasValue) {
 				builder.AddQueryString(name, value.Value.ToString("HH:mm:ss.fffffff").TrimEnd('0').TrimEnd('.'));
 			}
 			return builder;
