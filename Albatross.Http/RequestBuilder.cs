@@ -5,7 +5,6 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Albatross.Http {
 	/// <summary>
@@ -20,48 +19,66 @@ namespace Albatross.Http {
 		private JsonSerializerOptions _serializerOptions = DefaultJsonSerializerOptions.Value;
 		private HttpContent? _content;
 		readonly NameValueCollection _queryString = new NameValueCollection();
-		
+
 		public RequestBuilder UseSerializationOptions(JsonSerializerOptions options) {
 			this._serializerOptions = options;
 			return this;
 		}
+
 		public RequestBuilder WithMethod(HttpMethod method) {
 			this._method = method;
 			return this;
 		}
+
 		public RequestBuilder WithRelativeUrl(string relativeUrl) {
 			this._relativeUrl = relativeUrl;
 			return this;
 		}
+
 		public RequestBuilder AddQueryString(string name, string value) {
 			this._queryString.Add(name, value);
 			return this;
 		}
+
+		public RequestBuilder AddQueryStringIfSet(string name, IEnumerable<string?> values) {
+			foreach (var value in values) {
+				if (string.IsNullOrEmpty(value)) {
+					this._queryString.Add(name, value);
+				}
+			}
+			return this;
+		}
+
 		public RequestBuilder AddDateTimeQueryString(string name, DateTime value) {
 			this._queryString.Add(name, value.ToString("o"));
 			return this;
 		}
+
 		public RequestBuilder AddDateOnlyQueryString(string name, DateOnly value) {
 			this._queryString.Add(name, value.ToString("yyyy-MM-dd"));
 			return this;
 		}
+
 		public RequestBuilder AddTimeOnlyQueryString(string name, TimeOnly value) {
 			this._queryString.Add(name, value.ToString("HH:mm:ss.fffffff").TrimEnd('0').TrimEnd('.'));
 			return this;
 		}
+
 		public RequestBuilder AddDateTimeOffsetQueryString(string name, DateTimeOffset value) {
 			this._queryString.Add(name, value.ToString("o"));
 			return this;
 		}
+
 		public RequestBuilder CreateJsonRequest<T>(T? t) {
 			if (t != null) {
 				var text = JsonSerializer.Serialize<T>(t, this._serializerOptions);
 				_content = new StringContent(text, Encoding.UTF8, ContentTypes.Json);
-			}else {
+			} else {
 				_content = null;
 			}
 			return this;
 		}
+
 		public RequestBuilder CreateStringRequest(string? text) {
 			if (!string.IsNullOrEmpty(text)) {
 				_content = new StringContent(text, Encoding.UTF8, ContentTypes.Text);
@@ -70,10 +87,12 @@ namespace Albatross.Http {
 			}
 			return this;
 		}
+
 		public RequestBuilder CreateStreamRequest(Stream stream) {
 			_content = new StreamContent(stream);
 			return this;
 		}
+
 		public RequestBuilder CreateFormUrlEncodedRequest(IDictionary<string, string> formUrlEncodedValues) {
 			_content = new FormUrlEncodedContent(formUrlEncodedValues);
 			return this;
@@ -184,7 +203,7 @@ namespace Albatross.Http {
 		/// </summary>
 		public HttpRequestMessage Build() {
 			var url = _relativeUrl.CreateUrl(this._queryString);
-			if(url.Length > 0 && url[^1] == '&') {
+			if (url.Length > 0 && url[^1] == '&') {
 				url.Length -= 1; // remove trailing '&'
 			}
 			var request = new HttpRequestMessage(_method, url.ToString()) {
@@ -195,4 +214,3 @@ namespace Albatross.Http {
 		}
 	}
 }
-
