@@ -161,5 +161,14 @@ namespace Albatross.Http {
 			}
 			return new Uri(baseAddress, request.RequestUri);
 		}
+		
+		public const string ISO8601DateOnlyFormat = "yyyy-MM-dd";
+		public const string ISO8601TimeOnlyFormat = "HH:mm:ss.fffffff";
+		public const string ISO8601Format = "yyyy-MM-ddTHH:mm:ssK";
+		
+		public static string ISO8601(this DateOnly value) => value.ToString(ISO8601DateOnlyFormat);
+		public static string ISO8601(this TimeOnly value) => value.ToString(ISO8601TimeOnlyFormat).TrimEnd('0').TrimEnd('.');
+		public static string ISO8601(this DateTime value) => value.ToString(ISO8601Format);
+		public static string ISO8601(this DateTimeOffset value) => value.ToString(ISO8601Format);
 	}
 }
