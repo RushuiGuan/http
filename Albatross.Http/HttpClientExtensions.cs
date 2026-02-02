@@ -51,7 +51,7 @@ namespace Albatross.Http {
 				return result;
 			}
 		}
-		
+
 		public static async Task Send<TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
@@ -125,9 +125,11 @@ namespace Albatross.Http {
 				return result.Value;
 			}
 		}
-		public static Task<TResponse> ExecuteOrThrowStruct<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct 
+		public static Task<TResponse> ExecuteOrThrowStruct<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct
 			=> ExecuteOrThrowStruct<TResponse, string>(client, request, serializerOptions, cancellationToken);
 
+
+#if NET8_0_OR_GREATER
 		/// <summary>
 		/// Sends the HTTP request and streams the response as an async enumerable of items, yielding each item as it is
 		/// deserialized from the response stream. Designed for endpoints that use <c>yield return</c> or return
@@ -152,7 +154,8 @@ namespace Albatross.Http {
 				yield return item;
 			}
 		}
-		public static IAsyncEnumerable<TItem?> ExecuteAsStream<TItem>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, [EnumeratorCancellation] CancellationToken cancellationToken) 
+		public static IAsyncEnumerable<TItem?> ExecuteAsStream<TItem>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
 			=> ExecuteAsStream<TItem, string>(client, request, serializerOptions, cancellationToken);
+#endif
 	}
 }
