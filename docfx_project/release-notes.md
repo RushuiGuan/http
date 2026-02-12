@@ -50,6 +50,11 @@ Initial release of Albatross.Http, a companion library for `HttpClient` providin
 - `DelegatingHandler` for structured logging of HTTP requests and responses via `ILogger`
 - Logs request start, completion status, error response bodies, and cancellations
 
+### RegistrationExtensions
+
+- `AddLoggingHandler` - registers `LoggingHandler` as a transient service
+- `BuildDefault` - configures `IHttpClientBuilder` with sensible defaults: removes built-in HTTP loggers, enables GZip/Deflate/Brotli automatic decompression, auto-redirect, and optional Windows default credentials with pre-authentication
+
 ### ContentTypes
 
 - MIME type constants for JSON, text, HTML, CSV, form, Excel, octet-stream, multipart form data, and images
