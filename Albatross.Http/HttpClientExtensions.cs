@@ -1,4 +1,5 @@
 ﻿using Albatross.Exceptions;
+using Albatross.Http.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -11,21 +12,19 @@ using System.Threading.Tasks;
 
 namespace Albatross.Http {
 	public static class HttpClientExtensions {
-		static Exception ConvertToSemanticException(Exception source) {
-			Exception? result = null;
-			if (source is IServiceException serviceException) {
-				result = (int)serviceException.StatusCode switch {
-					NotAuthenticatedException.StatusCode => new NotAuthenticatedException("Not authenticated", source),
-					ForbiddenException.StatusCode => new ForbiddenException("Forbidden", source),
-					NotFoundException.StatusCode => new NotFoundException("Not found", source),
-					ConflictException.StatusCode => new ConflictException("Conflict", source),
-					PreconditionFailedException.StatusCode => new PreconditionFailedException("Precondition failed", source),
-					ValidationException.StatusCode => new ValidationException("Validation failed", source),
-					_ => null,
-				};
-			}
-			return result ?? source;
+		static Exception BuildSemanticException<T>(int statusCode, HttpMethod method, Uri requestUri, T? error) {
+			return statusCode switch {
+				NotAuthenticatedException.StatusCode => new NotAuthenticatedException<T>(method, requestUri, error),
+				ForbiddenException.StatusCode => new ForbiddenException<T>(method, requestUri, error),
+				NotFoundException.StatusCode => new NotFoundException<T>(method, requestUri, error),
+				ConflictException.StatusCode => new ConflictException<T>(method, requestUri, error),
+				PreconditionFailedException.StatusCode => new PreconditionFailedException<T>(method, requestUri, error),
+				ValidationException.StatusCode => new ValidationException<T>(method, requestUri, error),
+				_ => new ServiceException<T>(statusCode, method, requestUri, error),
+			};
 		}
+
+
 		static async Task<T?> ReadResponse<T>(HttpResponseMessage response, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
 				return default;
@@ -33,7 +32,11 @@ namespace Albatross.Http {
 				if (typeof(T) == typeof(string)) {
 					return (T?)(object)await response.Content.ReadAsStringAsync(cancellationToken);
 				} else {
-					return await response.Content.ReadFromJsonAsync<T>(serializerOptions, cancellationToken);
+					try {
+						return await response.Content.ReadFromJsonAsync<T>(serializerOptions, cancellationToken);
+					} catch (JsonException) {
+						return default(T);
+					}
 				}
 			}
 		}
@@ -57,10 +60,10 @@ namespace Albatross.Http {
 		/// <param name="cancellationToken">A cancellation token.</param>
 		/// <returns>The deserialized response, or null if the response has no content.</returns>
 		/// <remarks>
-		/// On an error status code (400+), the deserialized <typeparamref name="TError"/> body is wrapped in a
-		/// <see cref="ServiceException{TError}"/>. Recognized status codes are then rethrown as a semantic exception
-		/// from <c>Albatross.Exceptions</c> carrying that <see cref="ServiceException{TError}"/> as the inner exception;
-		/// all other error codes surface the <see cref="ServiceException{TError}"/> directly.
+		/// On an error status code (400+), recognized status codes throw the matching semantic exception from
+		/// <c>Albatross.Http.Exceptions</c> — each derives from its <c>Albatross.Exceptions</c> counterpart, implements
+		/// <see cref="Exceptions.IServiceException"/>, and carries the deserialized <typeparamref name="TError"/> body.
+		/// All other error codes throw <see cref="ServiceException{TError}"/>.
 		/// </remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
 		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
@@ -73,8 +76,7 @@ namespace Albatross.Http {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
 				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				var exception = new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
-				throw ConvertToSemanticException(exception);
+				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				var result = await ReadResponse<TResponse>(response, serializerOptions, cancellationToken);
 				return result;
@@ -101,8 +103,7 @@ namespace Albatross.Http {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
 				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				var exception = new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
-				throw ConvertToSemanticException(exception);
+				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			}
 		}
 
@@ -132,14 +133,14 @@ namespace Albatross.Http {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
 				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw ConvertToSemanticException(new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult));
+				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
-					throw new MissingRequiredValueException($"Expected {typeof(TResponse)} but no content was returned", new ServiceException(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), null));
+					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
 				}
 				var result = await ReadResponse<TResponse>(response, serializerOptions, cancellationToken);
 				if (result == null) {
-					throw new MissingRequiredValueException($"Expected {typeof(TResponse)} but no content was returned", new ServiceException(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), null));
+					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
 				}
 				return result;
 			}
@@ -175,14 +176,14 @@ namespace Albatross.Http {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
 				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw ConvertToSemanticException(new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult));
+				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
-					throw new MissingRequiredValueException($"Expected {typeof(TResponse)} but no content was returned", new ServiceException(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), null));
+					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
 				}
 				var result = await ReadResponse<TResponse?>(response, serializerOptions, cancellationToken);
 				if (result == null) {
-					throw new MissingRequiredValueException($"Expected {typeof(TResponse)} but no content was returned", new ServiceException(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), null));
+					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
 				}
 				return result.Value;
 			}
@@ -219,7 +220,7 @@ namespace Albatross.Http {
 			using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
 				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw ConvertToSemanticException(new ServiceException<TError>(response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult));
+				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			}
 			await foreach (var item in response.Content.ReadFromJsonAsAsyncEnumerable<TItem>(serializerOptions, cancellationToken)) {
 				yield return item;
