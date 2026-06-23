@@ -12,7 +12,8 @@
       "Bash(ls:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(dotnet pack:*)"
+      "Bash(dotnet pack:*)",
+      "Bash(echo \"exit:$?\")"
     ]
   }
 }

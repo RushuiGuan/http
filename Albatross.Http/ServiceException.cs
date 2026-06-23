@@ -3,6 +3,11 @@ using System.Net;
 using System.Net.Http;
 
 namespace Albatross.Http {
+	public interface IServiceException {
+		HttpStatusCode StatusCode { get; }
+		string Method { get; }
+		string Endpoint { get; }
+	}
 	/// <summary>
 	/// A <see cref="ServiceException{T}"/> with <see cref="string"/> as the error type,
 	/// used when the error response body is plain text or when a specific error type is not needed.
@@ -19,7 +24,7 @@ namespace Albatross.Http {
 	/// indicates a failure (400+).
 	/// </summary>
 	/// <typeparam name="T">The type of the deserialized error response body.</typeparam>
-	public class ServiceException<T> : Exception {
+	public class ServiceException<T> : Exception, IServiceException {
 		public HttpStatusCode StatusCode { get; }
 		public string Method { get; }
 		public string Endpoint { get; }

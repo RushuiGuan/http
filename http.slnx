@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path=".projects" />
+    <File Path="alias.ps1" />
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="Albatross.Http.Test/Albatross.Http.Test.csproj" />
+  <Project Path="Albatross.Http/Albatross.Http.csproj" />
+  <Project Path="Sample.CommandLine/Sample.CommandLine.csproj" />
+  <Project Path="Sample.WebApi/Sample.WebApi.csproj" />
+  <Project Path="Sample.WebClient/Sample.WebClient.csproj" />
+</Solution>
