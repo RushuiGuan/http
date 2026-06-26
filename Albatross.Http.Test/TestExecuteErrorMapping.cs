@@ -23,8 +23,8 @@ namespace Albatross.Http.Test {
 				() => client.Execute<string, string>(request, TestHttp.Options, CancellationToken.None));
 
 			Assert.IsAssignableFrom(expectedBaseType, ex);
-			var context = Assert.IsAssignableFrom<IServiceException>(ex);
-			Assert.Equal(status, context.StatusCode);
+			var context = Assert.IsAssignableFrom<IHttpException>(ex);
+			Assert.Equal(status, context.Status);
 		}
 
 		[Theory]
@@ -38,7 +38,7 @@ namespace Albatross.Http.Test {
 			var ex = await Assert.ThrowsAsync<ServiceException<string>>(
 				() => client.Execute<string, string>(request, TestHttp.Options, CancellationToken.None));
 
-			Assert.Equal(status, ((IServiceException)ex).StatusCode);
+			Assert.Equal(status, ((IHttpException)ex).Status);
 		}
 
 		[Fact]
@@ -46,11 +46,11 @@ namespace Albatross.Http.Test {
 			using var client = TestHttp.Client(HttpStatusCode.NotFound, "{\"message\":\"missing\"}");
 			using var request = new HttpRequestMessage(HttpMethod.Post, "api/widgets/5");
 
-			var ex = await Assert.ThrowsAsync<NotFoundException<ErrorBody>>(
+			var ex = await Assert.ThrowsAsync<HttpNotFoundException<ErrorBody>>(
 				() => client.Execute<string, ErrorBody>(request, TestHttp.Options, CancellationToken.None));
 
-			var context = (IServiceException)ex;
-			Assert.Equal(404, context.StatusCode);
+			var context = (IHttpException)ex;
+			Assert.Equal(404, context.Status);
 			Assert.Equal("POST", context.Method);
 			Assert.Equal("https://example.com/api/widgets/5", context.Endpoint);
 			Assert.Equal("missing", ex.ErrorObject?.Message);
@@ -61,7 +61,7 @@ namespace Albatross.Http.Test {
 			using var client = TestHttp.Client(HttpStatusCode.NotFound, "this is not json", "application/json");
 			using var request = new HttpRequestMessage(HttpMethod.Get, "api/test");
 
-			var ex = await Assert.ThrowsAsync<NotFoundException<ErrorBody>>(
+			var ex = await Assert.ThrowsAsync<HttpNotFoundException<ErrorBody>>(
 				() => client.Execute<string, ErrorBody>(request, TestHttp.Options, CancellationToken.None));
 
 			Assert.Null(ex.ErrorObject);

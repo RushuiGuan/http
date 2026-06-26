@@ -12,6 +12,7 @@
   <Project Path="Albatross.Http.Test/Albatross.Http.Test.csproj" />
   <Project Path="Albatross.Http/Albatross.Http.csproj" />
   <Project Path="Sample.CommandLine/Sample.CommandLine.csproj" />
+  <Project Path="Sample.Core/Sample.Core.csproj" Id="3dda21d7-0eb2-4e99-906d-4767c5b0528e" />
   <Project Path="Sample.WebApi/Sample.WebApi.csproj" />
   <Project Path="Sample.WebClient/Sample.WebClient.csproj" />
 </Solution>

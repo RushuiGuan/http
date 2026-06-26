@@ -15,6 +15,9 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Hosting" Version="10.0.1" />
+		<PackageReference Include="Albatross.Hosting" Version="10.2.0-135.main+d0f47c9" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Sample.Core\Sample.Core.csproj" />
 	</ItemGroup>
 </Project>

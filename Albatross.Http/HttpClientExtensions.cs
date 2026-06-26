@@ -12,15 +12,18 @@ using System.Threading.Tasks;
 
 namespace Albatross.Http {
 	public static class HttpClientExtensions {
-		static Exception BuildSemanticException<T>(int statusCode, HttpMethod method, Uri requestUri, T? error) {
+		static Exception BuildSemanticException(int statusCode, HttpMethod method, Uri requestUri, HttpResponseContent response) {
 			return statusCode switch {
-				NotAuthenticatedException.StatusCode => new NotAuthenticatedException<T>(method, requestUri, error),
-				ForbiddenException.StatusCode => new ForbiddenException<T>(method, requestUri, error),
-				NotFoundException.StatusCode => new NotFoundException<T>(method, requestUri, error),
-				ConflictException.StatusCode => new ConflictException<T>(method, requestUri, error),
-				PreconditionFailedException.StatusCode => new PreconditionFailedException<T>(method, requestUri, error),
-				ValidationException.StatusCode => new ValidationException<T>(method, requestUri, error),
-				_ => new ServiceException<T>(statusCode, method, requestUri, error),
+				HttpArgumentException.StatusCode => new HttpArgumentException(method, requestUri, response),
+				NotAuthenticatedException.StatusCode => new HttpNotAuthenticatedException(method, requestUri, response),
+				ForbiddenException.StatusCode => new HttpForbiddenException(method, requestUri, response),
+				NotFoundException.StatusCode => new HttpNotFoundException(method, requestUri, response),
+				HttpTimeoutException.StatusCode => new HttpTimeoutException(method, requestUri, response),
+				ConflictException.StatusCode => new HttpConflictException(method, requestUri, response),
+				PreconditionFailedException.StatusCode => new HttpPreconditionFailedException(method, requestUri, response),
+				ValidationException.StatusCode => new HttpValidationException(method, requestUri, response),
+				HttpNotSupportedException.StatusCode => new HttpNotSupportedException(method, requestUri, response),
+				_ => new ServiceException(statusCode, method, requestUri, response),
 			};
 		}
 
@@ -40,14 +43,16 @@ namespace Albatross.Http {
 				}
 			}
 		}
-
-		/// <summary>
-		/// Sends the HTTP request and deserializes the response, using <see cref="string"/> as the error type.
-		/// </summary>
-		/// <inheritdoc cref="Execute{TResponse, TError}"/>
-		public static Task<TResponse?> Execute<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
-			=> Execute<TResponse, string>(client, request, serializerOptions, cancellationToken);
-
+		public static async Task<HttpResponseContent> ReadResponse(HttpResponseMessage response, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
+			if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
+				return new HttpResponseContent();
+			} else {
+				return new HttpResponseContent {
+					ContentType = response.Content.Headers.ContentType?.MediaType,
+					Content = await response.Content.ReadAsStringAsync(cancellationToken),
+				};
+			}
+		}
 		/// <summary>
 		/// Sends the HTTP request and deserializes the response as <typeparamref name="TResponse"/>.
 		/// Returns null for 204 No Content or zero-length responses.
@@ -62,21 +67,21 @@ namespace Albatross.Http {
 		/// <remarks>
 		/// On an error status code (400+), recognized status codes throw the matching semantic exception from
 		/// <c>Albatross.Http.Exceptions</c> — each derives from its <c>Albatross.Exceptions</c> counterpart, implements
-		/// <see cref="Exceptions.IServiceException"/>, and carries the deserialized <typeparamref name="TError"/> body.
+		/// <see cref="Exceptions.IHttpException"/>, and carries the deserialized <typeparamref name="TError"/> body.
 		/// All other error codes throw <see cref="ServiceException{TError}"/>.
 		/// </remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
-		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
-		/// <exception cref="ForbiddenException">Thrown on 403 Forbidden.</exception>
-		/// <exception cref="NotFoundException">Thrown on 404 Not Found.</exception>
-		/// <exception cref="ConflictException">Thrown on 409 Conflict.</exception>
-		/// <exception cref="PreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
-		/// <exception cref="ValidationException">Thrown on 422 Unprocessable Entity.</exception>
-		public static async Task<TResponse?> Execute<TResponse, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
+		/// <exception cref="HttpNotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
+		/// <exception cref="HttpForbiddenException">Thrown on 403 Forbidden.</exception>
+		/// <exception cref="HttpNotFoundException">Thrown on 404 Not Found.</exception>
+		/// <exception cref="HttpConflictException">Thrown on 409 Conflict.</exception>
+		/// <exception cref="HttpPreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
+		/// <exception cref="HttpValidationException">Thrown on 422 Unprocessable Entity.</exception>
+		public static async Task<TResponse?> Execute<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
-				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+				var errorResult = await ReadResponse(response, serializerOptions, cancellationToken);
+				throw BuildSemanticException((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				var result = await ReadResponse<TResponse>(response, serializerOptions, cancellationToken);
 				return result;
@@ -93,17 +98,17 @@ namespace Albatross.Http {
 		/// <param name="cancellationToken">A cancellation token.</param>
 		/// <remarks>Error status codes (400+) are handled as described on <see cref="Execute{TResponse, TError}"/>.</remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
-		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
-		/// <exception cref="ForbiddenException">Thrown on 403 Forbidden.</exception>
-		/// <exception cref="NotFoundException">Thrown on 404 Not Found.</exception>
-		/// <exception cref="ConflictException">Thrown on 409 Conflict.</exception>
-		/// <exception cref="PreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
-		/// <exception cref="ValidationException">Thrown on 422 Unprocessable Entity.</exception>
-		public static async Task Send<TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
+		/// <exception cref="HttpNotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
+		/// <exception cref="HttpForbiddenException">Thrown on 403 Forbidden.</exception>
+		/// <exception cref="HttpNotFoundException">Thrown on 404 Not Found.</exception>
+		/// <exception cref="HttpConflictException">Thrown on 409 Conflict.</exception>
+		/// <exception cref="HttpPreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
+		/// <exception cref="HttpValidationException">Thrown on 422 Unprocessable Entity.</exception>
+		public static async Task Send(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
-				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+				var errorResult = await ReadResponse(response, serializerOptions, cancellationToken);
+				throw BuildSemanticException((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			}
 		}
 
@@ -122,18 +127,18 @@ namespace Albatross.Http {
 		/// response with no body (204 or zero length) or one that deserializes to null is treated as a contract violation.
 		/// </remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
-		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
-		/// <exception cref="ForbiddenException">Thrown on 403 Forbidden.</exception>
-		/// <exception cref="NotFoundException">Thrown on 404 Not Found.</exception>
-		/// <exception cref="ConflictException">Thrown on 409 Conflict.</exception>
-		/// <exception cref="PreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
-		/// <exception cref="ValidationException">Thrown on 422 Unprocessable Entity.</exception>
+		/// <exception cref="HttpNotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
+		/// <exception cref="HttpForbiddenException">Thrown on 403 Forbidden.</exception>
+		/// <exception cref="HttpNotFoundException">Thrown on 404 Not Found.</exception>
+		/// <exception cref="HttpConflictException">Thrown on 409 Conflict.</exception>
+		/// <exception cref="HttpPreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
+		/// <exception cref="HttpValidationException">Thrown on 422 Unprocessable Entity.</exception>
 		/// <exception cref="MissingRequiredValueException">Thrown when a successful response has no content or deserializes to null.</exception>
-		public static async Task<TResponse> ExecuteOrThrow<TResponse, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : class {
+		public static async Task<TResponse> ExecuteOrThrow<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : class {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
-				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+				var errorResult = await ReadResponse(response, serializerOptions, cancellationToken);
+				throw BuildSemanticException((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
 					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
@@ -145,9 +150,6 @@ namespace Albatross.Http {
 				return result;
 			}
 		}
-
-		public static Task<TResponse> ExecuteOrThrow<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : class
-			=> ExecuteOrThrow<TResponse, string>(client, request, serializerOptions, cancellationToken);
 
 		/// <summary>
 		/// Sends the HTTP request and returns a guaranteed response of the specified value type.
@@ -165,18 +167,18 @@ namespace Albatross.Http {
 		/// response with no body (204 or zero length) or one that deserializes to null is treated as a contract violation.
 		/// </remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
-		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
-		/// <exception cref="ForbiddenException">Thrown on 403 Forbidden.</exception>
-		/// <exception cref="NotFoundException">Thrown on 404 Not Found.</exception>
-		/// <exception cref="ConflictException">Thrown on 409 Conflict.</exception>
-		/// <exception cref="PreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
-		/// <exception cref="ValidationException">Thrown on 422 Unprocessable Entity.</exception>
+		/// <exception cref="HttpNotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
+		/// <exception cref="HttpForbiddenException">Thrown on 403 Forbidden.</exception>
+		/// <exception cref="HttpNotFoundException">Thrown on 404 Not Found.</exception>
+		/// <exception cref="HttpConflictException">Thrown on 409 Conflict.</exception>
+		/// <exception cref="HttpPreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
+		/// <exception cref="HttpValidationException">Thrown on 422 Unprocessable Entity.</exception>
 		/// <exception cref="MissingRequiredValueException">Thrown when a successful response has no content or deserializes to null.</exception>
-		public static async Task<TResponse> ExecuteOrThrowStruct<TResponse, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct {
+		public static async Task<TResponse> ExecuteOrThrowStruct<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct {
 			using var response = await client.SendAsync(request, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
-				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+				var errorResult = await ReadResponse(response, serializerOptions, cancellationToken);
+				throw BuildSemanticException((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			} else {
 				if (response.StatusCode == HttpStatusCode.NoContent || response.Content.Headers.ContentLength == 0) {
 					throw new MissingRequiredValueException<TResponse>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress));
@@ -188,11 +190,9 @@ namespace Albatross.Http {
 				return result.Value;
 			}
 		}
-		public static Task<TResponse> ExecuteOrThrowStruct<TResponse>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken) where TResponse : struct
-			=> ExecuteOrThrowStruct<TResponse, string>(client, request, serializerOptions, cancellationToken);
+		
 
 
-#if NET8_0_OR_GREATER
 		/// <summary>
 		/// Sends the HTTP request and streams the response as an async enumerable of items, yielding each item as it is
 		/// deserialized from the response stream. Designed for endpoints that use <c>yield return</c> or return
@@ -210,24 +210,21 @@ namespace Albatross.Http {
 		/// The status code is checked before streaming begins; error handling matches <see cref="Execute{TResponse, TError}"/>.
 		/// </remarks>
 		/// <exception cref="ServiceException{TError}">Thrown for an error status code (400+) that has no dedicated semantic exception.</exception>
-		/// <exception cref="NotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
-		/// <exception cref="ForbiddenException">Thrown on 403 Forbidden.</exception>
-		/// <exception cref="NotFoundException">Thrown on 404 Not Found.</exception>
-		/// <exception cref="ConflictException">Thrown on 409 Conflict.</exception>
-		/// <exception cref="PreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
-		/// <exception cref="ValidationException">Thrown on 422 Unprocessable Entity.</exception>
-		public static async IAsyncEnumerable<TItem?> ExecuteAsStream<TItem, TError>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, [EnumeratorCancellation] CancellationToken cancellationToken) {
+		/// <exception cref="HttpNotAuthenticatedException">Thrown on 401 Unauthorized.</exception>
+		/// <exception cref="HttpForbiddenException">Thrown on 403 Forbidden.</exception>
+		/// <exception cref="HttpNotFoundException">Thrown on 404 Not Found.</exception>
+		/// <exception cref="HttpConflictException">Thrown on 409 Conflict.</exception>
+		/// <exception cref="HttpPreconditionFailedException">Thrown on 412 Precondition Failed.</exception>
+		/// <exception cref="HttpValidationException">Thrown on 422 Unprocessable Entity.</exception>
+		public static async IAsyncEnumerable<TItem?> ExecuteAsStream<TItem>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, [EnumeratorCancellation] CancellationToken cancellationToken) {
 			using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 			if (response.StatusCode >= HttpStatusCode.BadRequest) {
-				var errorResult = await ReadResponse<TError>(response, serializerOptions, cancellationToken);
-				throw BuildSemanticException<TError>((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
+				var errorResult = await ReadResponse(response, serializerOptions, cancellationToken);
+				throw BuildSemanticException((int)response.StatusCode, request.Method, request.GetFullUri(client.BaseAddress), errorResult);
 			}
 			await foreach (var item in response.Content.ReadFromJsonAsAsyncEnumerable<TItem>(serializerOptions, cancellationToken)) {
 				yield return item;
 			}
 		}
-		public static IAsyncEnumerable<TItem?> ExecuteAsStream<TItem>(this HttpClient client, HttpRequestMessage request, JsonSerializerOptions serializerOptions, CancellationToken cancellationToken)
-			=> ExecuteAsStream<TItem, string>(client, request, serializerOptions, cancellationToken);
-#endif
 	}
 }

@@ -1,0 +1,31 @@
+{
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Anchor.Repositories": "Warning",
+        "System": "Error",
+        "Microsoft": "Error"
+      }
+    },
+    "WriteTo": {
+      "File": {
+        "Name": "File",
+        "Args": {
+          "path": "%LogDirectory%/Sample.CommandLine/Sample.CommandLine-.log",
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ssz} {MachineName} {TraceIdentifier} {RequestId} {SourceContext} {ThreadId} [{Level:w3}] {Message:lj}{NewLine}{Exception}",
+          "rollingInterval": "Day"
+        }
+      }
+    },
+    "Using": [
+      "Albatross.Logging"
+    ],
+    "Enrich": [
+      "FromLogContext",
+      "WithThreadId",
+      "WithMachineName",
+      "WithErrorMessage"
+    ]
+  }
+}

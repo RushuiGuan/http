@@ -1,26 +1,37 @@
-﻿using System.Threading.Tasks;
+﻿using Albatross.CommandLine.Defaults;
 using Albatross.CommandLine;
-using Albatross.CommandLine.Defaults;
+using Albatross.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using System.CommandLine;
+using Microsoft.Extensions.Hosting;
 using Sample.WebClient;
+using Serilog;
+using System.CommandLine;
+using System.Threading.Tasks;
 
 namespace Sample.CommandLine {
 	internal class Program {
 		static async Task<int> Main(string[] args) {
-			Albatross.Logging.Extensions.RemoveLegacySlackSinkOptions();
-			await using var host = new CommandHost("Sample Command Line Application");
-			host.RegisterServices(RegisterServices)
-				.AddCommands()
-				.Parse(args, false)
-				.WithDefaults()
-				.Build();
+			await using var host = new CommandHost("Sample Cli")
+			.RegisterServices(RegisterServices)
+			.AddCommands()
+			.Parse(args)
+			.WithConfig()
+			.ConfigureHost(builder => {
+				builder.UseSerilog();
+				builder.ConfigureLogging((context, logging) => {
+					var setupSerilog = new SetupSerilog();
+					setupSerilog.UseConfigFile(string.Empty, null, args, false);
+					setupSerilog.Create();
+				});
+			})
+			.Build();
 			return await host.InvokeAsync();
 		}
-		
+
 		static void RegisterServices(ParseResult result, IServiceCollection services) {
-			services.AddSampleWebClient();
 			services.RegisterCommands();
+			services.AddSampleWebClient();
+			services.AddSingleton<ICommandErrorHandler, DefaultCommandErrorHandler>();
 		}
 	}
 }

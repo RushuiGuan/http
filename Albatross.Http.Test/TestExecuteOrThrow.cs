@@ -17,7 +17,7 @@ namespace Albatross.Http.Test {
 			var ex = await Assert.ThrowsAsync<MissingRequiredValueException<Widget>>(
 				() => client.ExecuteOrThrow<Widget, string>(request, TestHttp.Options, CancellationToken.None));
 
-			Assert.Equal((int)status, ((IServiceException)ex).StatusCode);
+			Assert.Equal((int)status, ((IHttpException)ex).Status);
 		}
 
 		[Fact]

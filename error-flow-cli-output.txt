@@ -1,0 +1,186 @@
+Error-flow CLI test run
+Command form: sample error <controllerRoute> <endpointRoute>  (GET /api/<controller>/<endpoint>)
+
+================================================================
+$ sample error global semantic
+----------------------------------------------------------------
+{
+   "title": "An error occurred while processing your request",
+   "status": 404,
+   "detail": "entity a",
+   "traceId": "0HNMJQS577O31:00000001",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/global/semantic"
+}
+================================================================
+$ sample error global server
+----------------------------------------------------------------
+{
+   "title": "An error occurred while processing your request",
+   "status": 500,
+   "detail": "this shouuld not happen",
+   "traceId": "0HNMJQS577O32:00000001",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/global/server"
+}
+================================================================
+$ sample error global semantic-with-inner
+----------------------------------------------------------------
+{
+   "title": "An error occurred while processing your request",
+   "status": 404,
+   "detail": "entity a",
+   "traceId": "0HNMJQS577O33:00000001",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/global/semantic-with-inner"
+}
+================================================================
+$ sample error default-with-detail semantic
+----------------------------------------------------------------
+{
+   "title": "Bad request",
+   "status": 400,
+   "detail": "This is a test exception",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/default-with-detail/semantic"
+}
+================================================================
+$ sample error default-with-detail server
+----------------------------------------------------------------
+{
+   "title": "Unhandled exception",
+   "status": 500,
+   "detail": "This is a test exception",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/default-with-detail/server"
+}
+================================================================
+$ sample error default-with-detail semantic-with-inner
+----------------------------------------------------------------
+{
+   "title": "Bad request",
+   "status": 400,
+   "detail": "This is a test exception",
+   "method": "GET",
+   "endpoint": 
+"http://localhost:15000/api/default-with-detail/semantic-with-inner"
+}
+================================================================
+$ sample error default-without-detail semantic
+----------------------------------------------------------------
+{
+   "title": "Bad request",
+   "status": 400,
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/default-without-detail/semantic"
+}
+================================================================
+$ sample error default-without-detail server
+----------------------------------------------------------------
+{
+   "title": "Unhandled exception",
+   "status": 500,
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/default-without-detail/server"
+}
+================================================================
+$ sample error default-without-detail semantic-with-inner
+----------------------------------------------------------------
+{
+   "title": "Bad request",
+   "status": 400,
+   "method": "GET",
+   "endpoint": 
+"http://localhost:15000/api/default-without-detail/semantic-with-inner"
+}
+================================================================
+$ sample error explicit problem-details
+----------------------------------------------------------------
+{
+   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+   "title": "Not Found",
+   "status": 404,
+   "detail": "entity a not found",
+   "traceId": "00-8ba744e85958892262d0e71e07ad520a-399c263fd4e6a8fa-00",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/explicit/problem-details"
+}
+================================================================
+$ sample error explicit custom
+----------------------------------------------------------------
+{
+   "error": "not_found",
+   "message": "entity a not found",
+   "id": 42,
+   "status": 404,
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/explicit/custom"
+}
+================================================================
+$ sample error explicit string
+----------------------------------------------------------------
+{
+   "status": 404,
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/explicit/string",
+   "content": "entity a not found"
+}
+================================================================
+$ sample error explicit empty
+----------------------------------------------------------------
+{
+   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+   "title": "Not Found",
+   "status": 404,
+   "traceId": "00-752fd860e2677770d7e7bab232b0867e-dc7ac0868300a0f1-00",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/explicit/empty"
+}
+================================================================
+$ sample error fluent has-problem
+----------------------------------------------------------------
+{
+   "title": "One or more validation errors occurred.",
+   "status": 400,
+   "errors": {
+      "Name": [
+         "Name is required"
+      ],
+      "Quantity": [
+         "Quantity must be positive"
+      ]
+   },
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/fluent/has-problem"
+}
+================================================================
+$ sample error fluent validate-and-throw
+----------------------------------------------------------------
+{
+   "title": "An error occurred while processing your request",
+   "status": 422,
+   "detail": "Validation failed: \r\n -- Name: Name is required Severity: 
+Error\r\n -- Quantity: Quantity must be positive Severity: Error",
+   "traceId": "0HNMJQS577O3F:00000001",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/fluent/validate-and-throw"
+}
+================================================================
+$ sample error fluent validation-problem
+----------------------------------------------------------------
+{
+   "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+   "title": "One or more validation errors occurred.",
+   "status": 400,
+   "errors": {
+      "Name": [
+         "Name is required"
+      ],
+      "Quantity": [
+         "Quantity must be positive"
+      ]
+   },
+   "traceId": "00-7a7b6d866102a1fcdbd2b6af77eff81f-43a937083f54b6bc-00",
+   "method": "GET",
+   "endpoint": "http://localhost:15000/api/fluent/validation-problem"
+}

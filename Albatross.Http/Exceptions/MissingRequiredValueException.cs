@@ -8,14 +8,17 @@ namespace Albatross.Http.Exceptions {
 	/// Thrown when a successful HTTP response returned no content (or content that deserialized to null) where a
 	/// <typeparamref name="TResponse"/> value was required. Derives from
 	/// <see cref="Albatross.Exceptions.MissingRequiredValueException"/> and exposes the originating response
-	/// context via <see cref="IServiceException"/>.
+	/// context via <see cref="IHttpException"/>.
 	/// </summary>
 	/// <typeparam name="TResponse">The response type that was expected but not returned.</typeparam>
-	public class MissingRequiredValueException<TResponse> : MissingRequiredValueException, IServiceException {
+	public class MissingRequiredValueException<TResponse> : MissingRequiredValueException, IHttpException {
 		readonly int statusCode;
-		int IServiceException.StatusCode => statusCode;
+		int IHttpException.Status => statusCode;
 		public string Method { get; }
 		public string Endpoint { get; }
+		// a successful response with no body: there is no error content to expose
+		public string? ContentType => null;
+		public string? Content => null;
 
 		public MissingRequiredValueException(int statusCode, HttpMethod method, Uri endpoint)
 			: base($"Expected {typeof(TResponse)} but no content was returned") {

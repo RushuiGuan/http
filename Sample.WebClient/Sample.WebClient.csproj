@@ -10,5 +10,6 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Albatross.Http\Albatross.Http.csproj" />
+		<ProjectReference Include="..\Sample.Core\Sample.Core.csproj" />
 	</ItemGroup>
 </Project>
