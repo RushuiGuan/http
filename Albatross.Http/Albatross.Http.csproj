@@ -9,7 +9,7 @@
 		<PackageTags>httpclient</PackageTags>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Albatross.Exceptions" Version="1.0.0-6.main" />
+		<PackageReference Include="Albatross.Exceptions" Version="1.0.0-rc.13" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 		<PackageReference Include="System.Text.Json" Version="8.0.6" />
