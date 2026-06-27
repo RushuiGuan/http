@@ -26,7 +26,9 @@
       "Bash(grep -rln -E \"Execute<|Send<|ExecuteAsStream|ExecuteOrThrow|ErrorObject|<string>|<ProblemDetails>|<ErrorResult>\" --include=*.cs Albatross.Http.Test Sample.WebClient Sample.CommandLine)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:15000/api/fluent/has-problem)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:15000/api/explicit/custom)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:15000/api/global/semantic)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:15000/api/global/semantic)",
+      "Bash(sed -i 's/ExecuteOrThrow<Widget, string>/ExecuteOrThrow<Widget>/' Albatross.Http.Test/TestExecuteOrThrow.cs)",
+      "Read(//c/c/app/http/Albatross.Http.Test/**)"
     ]
   }
 }

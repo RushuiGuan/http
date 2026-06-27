@@ -20,7 +20,7 @@ namespace Albatross.Http.Exceptions {
 			this.Method = method.ToString();
 			this.Endpoint = endpoint.ToString();
 			this.ContentType = response.ContentType;
-			this.ContentType = response.Content;
+			this.Content = response.Content;
 		}
 	}
 }

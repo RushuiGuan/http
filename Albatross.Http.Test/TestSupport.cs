@@ -11,10 +11,6 @@ namespace Albatross.Http.Test {
 		public string? Name { get; set; }
 	}
 
-	public class ErrorBody {
-		public string? Message { get; set; }
-	}
-
 	/// <summary>
 	/// Returns a fixed response so the HttpClientExtensions methods can be exercised without a real server.
 	/// </summary>
