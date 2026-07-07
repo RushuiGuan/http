@@ -1,10 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net.Http;
 
 namespace Albatross.Http {
 	public static class RegistrationExtensions {
-		public static IServiceCollection AddLoggingHandler(this IServiceCollection services)
-			=> services.AddTransient<LoggingHandler>();
+		public static IServiceCollection AddLoggingHandler(this IServiceCollection services) {
+			services.TryAddTransient<LoggingHandler>();
+			return services;
+		}
 
 		/// <summary>
 		/// Configures an <see cref="IHttpClientBuilder"/> with sensible defaults: removes the built-in HTTP loggers
