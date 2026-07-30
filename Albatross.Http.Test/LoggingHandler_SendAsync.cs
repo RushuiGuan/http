@@ -27,7 +27,7 @@ namespace Albatross.Http.Test {
 			var response = await invoker.SendAsync(Request(), CancellationToken.None);
 
 			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-			Assert.All(logger.Entries, e => Assert.Equal(LogLevel.Debug, e.Level));
+			Assert.All(logger.Entries, e => Assert.Equal(LogLevel.Information, e.Level));
 			Assert.Contains(logger.Entries, e => e.Message.Contains("started"));
 			Assert.Contains(logger.Entries, e => e.Message.Contains("completed"));
 			Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
