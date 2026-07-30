@@ -35,11 +35,7 @@ namespace Albatross.Http {
 				if (typeof(T) == typeof(string)) {
 					return (T?)(object)await response.Content.ReadAsStringAsync(cancellationToken);
 				} else {
-					try {
-						return await response.Content.ReadFromJsonAsync<T>(serializerOptions, cancellationToken);
-					} catch (JsonException) {
-						return default(T);
-					}
+					return await response.Content.ReadFromJsonAsync<T>(serializerOptions, cancellationToken);
 				}
 			}
 		}
@@ -190,7 +186,7 @@ namespace Albatross.Http {
 				return result.Value;
 			}
 		}
-		
+
 
 
 		/// <summary>
