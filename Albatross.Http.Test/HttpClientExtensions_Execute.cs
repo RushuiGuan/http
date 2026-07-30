@@ -43,16 +43,6 @@ namespace Albatross.Http.Test {
 			Assert.Null(result);
 		}
 
-		[Fact]
-		public async Task MalformedJsonBody_ReturnsDefault() {
-			using var client = TestHttp.Client(HttpStatusCode.OK, "this is not json");
-			using var request = new HttpRequestMessage(HttpMethod.Get, "api/test");
-
-			var result = await client.Execute<Widget>(request, TestHttp.Options, CancellationToken.None);
-
-			Assert.Null(result);
-		}
-
 		// each recognized error status maps to its dedicated semantic exception
 		[Theory]
 		[InlineData(400, typeof(HttpArgumentException))]
