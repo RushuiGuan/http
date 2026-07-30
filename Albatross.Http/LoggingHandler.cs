@@ -24,14 +24,14 @@ namespace Albatross.Http {
 		}
 
 		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
-			logger.LogDebug("HTTP {method} {uri} started", request.Method, request.RequestUri);
+			logger.LogInformation("HTTP {method} {uri} started", request.Method, request.RequestUri);
 			try {
 				var response = await base.SendAsync(request, cancellationToken);
 				if (response.StatusCode >= HttpStatusCode.BadRequest) {
 					var body = await response.Content.ReadAsStringAsync(cancellationToken);
 					logger.LogError("HTTP {method} {uri} failed {statusCode}\n{body}", request.Method, request.RequestUri, (int)response.StatusCode, body);
 				} else {
-					logger.LogDebug("HTTP {method} {uri} completed {statusCode}", request.Method, request.RequestUri, (int)response.StatusCode);
+					logger.LogInformation("HTTP {method} {uri} completed {statusCode}", request.Method, request.RequestUri, (int)response.StatusCode);
 				}
 				return response;
 			} catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested) {
