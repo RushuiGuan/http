@@ -11,8 +11,8 @@
 		<PackageReference Include="Albatross.CommandLine" Version="8.0.14" />
 		<PackageReference Include="Albatross.CommandLine.Defaults" Version="8.0.14" />
 		<PackageReference Include="Albatross.CommandLine.Inputs" Version="8.0.14" />
-		<PackageReference Include="Spectre.Console" Version="0.57.1" />
-		<PackageReference Include="Spectre.Console.Json" Version="0.57.1" />
+		<PackageReference Include="Spectre.Console" Version="0.57.2" />
+		<PackageReference Include="Spectre.Console.Json" Version="0.57.2" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Sample.WebClient\Sample.WebClient.csproj" />
