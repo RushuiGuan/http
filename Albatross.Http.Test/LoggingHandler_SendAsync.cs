@@ -33,17 +33,18 @@ namespace Albatross.Http.Test {
 			Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
 		}
 
-		// an error status is not thrown by the handler; it is logged at Error with the status code and body, and the
-		// response is still returned to the caller
+		// an error status is not thrown by the handler; it is logged at Information with the status code and body, and
+		// the response is still returned to the caller
 		[Fact]
-		public async Task ErrorResponse_LogsErrorWithStatusAndBodyAndReturnsResponse() {
+		public async Task ErrorResponse_LogsInformationWithStatusAndBodyAndReturnsResponse() {
 			var inner = new StubInnerHandler(new HttpResponseMessage(HttpStatusCode.NotFound) { Content = new StringContent("boom") });
 			var (invoker, logger) = CreateInvoker(inner);
 
 			var response = await invoker.SendAsync(Request(), CancellationToken.None);
 
 			Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-			Assert.Contains(logger.Entries, e => e.Level == LogLevel.Error && e.Message.Contains("404") && e.Message.Contains("boom"));
+			Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("404") && e.Message.Contains("boom"));
+			Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
 		}
 
 		// when the request is cancelled, the cancellation is logged at Information and the original exception rethrown
@@ -58,9 +59,9 @@ namespace Albatross.Http.Test {
 			Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("cancelled"));
 		}
 
-		// any other failure is logged at Error with the exception attached and rethrown
+		// any other failure is logged at Information with the exception message, without the exception attached, and rethrown
 		[Fact]
-		public async Task InnerException_LogsErrorWithExceptionAndRethrows() {
+		public async Task InnerException_LogsInformationWithMessageAndRethrows() {
 			var failure = new InvalidOperationException("inner failed");
 			var inner = new StubInnerHandler(failure);
 			var (invoker, logger) = CreateInvoker(inner);
@@ -68,7 +69,8 @@ namespace Albatross.Http.Test {
 			var thrown = await Assert.ThrowsAsync<InvalidOperationException>(() => invoker.SendAsync(Request(), CancellationToken.None));
 
 			Assert.Same(failure, thrown);
-			Assert.Contains(logger.Entries, e => e.Level == LogLevel.Error && ReferenceEquals(e.Exception, failure));
+			Assert.Contains(logger.Entries, e => e.Level == LogLevel.Information && e.Message.Contains("inner failed") && e.Exception == null);
+			Assert.DoesNotContain(logger.Entries, e => e.Level == LogLevel.Error);
 		}
 	}
 

@@ -1,5 +1,11 @@
 # Release Notes
 
+## 2.0.3
+
+### Changes
+
+- `LoggingHandler` logs failed responses and request exceptions at `Information` instead of `Error`. The failed response is returned and the exception is rethrown, so the caller already logs the error where it is handled; logging it in the handler as well produced a duplicate error entry, which also reached alert sinks such as email and Slack for expected client errors like a 400. The exception is no longer attached to the entry; its message is logged instead
+
 ## 2.0.2
 
 ### Target frameworks

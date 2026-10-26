@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Albatross.Http {
 	/// <summary>
-	/// A delegating handler that logs HTTP request and response details using structured logging.
+	/// A delegating handler that logs HTTP request and response details using structured logging.  Failures are
+	/// logged at Information: the failed response is returned and an exception is rethrown, so the caller logs the
+	/// error where it is handled.
 	/// </summary>
 	/// <remarks>
 	/// Register with IHttpClientFactory:
@@ -29,7 +31,7 @@ namespace Albatross.Http {
 				var response = await base.SendAsync(request, cancellationToken);
 				if (response.StatusCode >= HttpStatusCode.BadRequest) {
 					var body = await response.Content.ReadAsStringAsync(cancellationToken);
-					logger.LogError("HTTP {method} {uri} failed {statusCode}\n{body}", request.Method, request.RequestUri, (int)response.StatusCode, body);
+					logger.LogInformation("HTTP {method} {uri} failed {statusCode}\n{body}", request.Method, request.RequestUri, (int)response.StatusCode, body);
 				} else {
 					logger.LogInformation("HTTP {method} {uri} completed {statusCode}", request.Method, request.RequestUri, (int)response.StatusCode);
 				}
@@ -38,7 +40,7 @@ namespace Albatross.Http {
 				logger.LogInformation("HTTP {method} {uri} cancelled", request.Method, request.RequestUri);
 				throw;
 			} catch (System.Exception err) {
-				logger.LogError(err, "HTTP {method} {uri} failed", request.Method, request.RequestUri);
+				logger.LogInformation("HTTP {method} {uri} failed: {message}", request.Method, request.RequestUri, err.Message);
 				throw;
 			}
 		}
